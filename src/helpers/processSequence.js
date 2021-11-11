@@ -14,38 +14,153 @@
  * Иногда промисы от API будут приходить в состояние rejected, (прямо как и API в реальной жизни)
  * Ответ будет приходить в поле {result}
  */
+
+import {
+    __,    allPass,    both,    compose,    set,    gt,    lt,    pipe,
+    tap,    length,    test,    ifElse,    pipeWith,    andThen,    lensProp,
+    append, apply, prop, converge, multiply, identity, modulo, concat
+} from "ramda"
+
 import Api from '../tools/api';
 
 const api = new Api();
+const baseURL = 'https://api.tech/numbers/base'
+const animalURL = 'https://animals.tech/'
+const getResult = prop("result")
+const resolve = (value) => Promise.resolve(value)
 
-/**
- * Я – пример, удали меня
- */
-const wait = time => new Promise(resolve => {
-    setTimeout(resolve, time);
-})
+const getAnimal = pipeWith(andThen, [
+    Promise.resolve,
+    String,
+    concat(animalURL),
+    api.get(__, null),
+    getResult
+])
 
-const processSequence = ({value, writeLog, handleSuccess, handleError}) => {
-    /**
-     * Я – пример, удали меня
-     */
-    writeLog(value);
+const square = converge(
+    multiply,
+    [identity, identity]
+)
 
-    api.get('https://api.tech/numbers/base', {from: 2, to: 10, number: '01011010101'}).then(({result}) => {
-        writeLog(result);
-    });
+const queryParams =  {form: 10,
+                        to: 2,
+                    number: null}
 
-    wait(2500).then(() => {
-        writeLog('SecondLog')
+const convertToBinary = pipeWith(andThen, [
+    resolve,
+    set(
+        lensProp("number"),
+        __,
+       queryParams
+    ),
+    append(__, [baseURL]),
+    apply(api.get),
+    getResult
+])
 
-        return wait(1500);
-    }).then(() => {
-        writeLog('ThirdLog');
+const roundValue = compose(
+    Math.round,
+    Number
+)
 
-        return wait(400);
-    }).then(() => {
-        handleSuccess('Done');
-    });
+const isNotInfinity = compose(
+    Number.isFinite,
+    Number
+)
+
+const validateLength =  compose(
+    both(
+        gt(__, 2),
+        lt(__, 10)
+    ),
+    length
+)
+
+const isPositive =  compose(
+    gt(__, 0),
+    Number
+)
+
+const isOnlyDigitsAndPoint = test(/^[\d\\.]+/)
+
+const validate = allPass([
+    isNotInfinity,
+    validateLength,
+    isPositive,
+    isOnlyDigitsAndPoint
+])
+
+const VALIDATION_FAILURE_MESSAGE = "ValidationError"
+
+
+const processSequence = async ({
+       value, writeLog, handleSuccess, handleError
+}) => {
+    // const onSuccessValidation = pipeWith( andThen, [
+    //     resolve,
+    //     roundValue,
+    //     tap(writeLog),
+    //     convertToBinary,
+    //     tap(writeLog),
+    //     String,
+    //     length,
+    //     tap(writeLog),
+    //     square,
+    //     tap(writeLog),
+    //     modulo(__, 3),
+    //     tap(writeLog),
+    //     getAnimal,
+    //     tap(writeLog),
+    //     handleSuccess
+    // ])
+
+    try {
+        await pipe(
+            tap(writeLog),
+            ifElse(
+                validate,
+                pipeWith( andThen, [
+                    resolve,
+                    roundValue,
+                    tap(writeLog),
+                    convertToBinary,
+                    tap(writeLog),
+                    String,
+                    length,
+                    tap(writeLog),
+                    square,
+                    tap(writeLog),
+                    modulo(__, 3),
+                    tap(writeLog),
+                    getAnimal,
+                    tap(writeLog),
+                    handleSuccess
+                ]),
+                handleError(VALIDATION_FAILURE_MESSAGE),
+            )
+        ) (value)
+    } catch (e) {
+        handleError(e)
+    }
+
+
+    // writeLog(value);
+    //
+    // api.get('https://api.tech/numbers/base', {from: 2, to: 10, number: '01011010101'}).then(({result}) => {
+    //     writeLog(result);
+    // });
+    //
+    // wait(2500).then(() => {
+    //     writeLog('SecondLog')
+    //
+    //     return wait(1500);
+    // }).then(() => {
+    //     writeLog('ThirdLog');
+    //
+    //     return wait(400);
+    // }).then(() => {
+    //     handleSuccess('Done');
+    // });
 }
 
 export default processSequence;
