@@ -80,7 +80,7 @@ const isPositive =  compose(
     roundValue
 )
 
-const isNumber = test(/^\d*(\.[\d]+)?$/)
+const isNumber = test(/^\d+(\.[\d]+)?$/)
 
 const validate = allPass([
         validateLength,
