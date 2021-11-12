@@ -77,7 +77,7 @@ const validateLength =  compose(
 
 const isPositive =  compose(
     gt(__, 0),
-    Number
+    roundValue
 )
 
 const isNumber = test(/^\d*(\.[\d]+)?$/)
