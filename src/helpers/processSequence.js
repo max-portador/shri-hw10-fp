@@ -101,7 +101,7 @@ const prepareNumber = pipe(
     square,
     tap(writeLog),
     modulo(__, 3),
-    tap(writeLog),
+
 )
 
  const onTrue = pipeWith( andThen, [
@@ -111,13 +111,14 @@ const prepareNumber = pipe(
      convertToBinary,
      tap(writeLog),
      prepareNumber,
+     tap(writeLog),
      getAnimal,
      handleSuccess
  ])
 
 const onFalse = () => { handleError(VALIDATION_FAILURE_MESSAGE) }
 
-const tryer =  await pipe(
+const mainProcessor =  await pipe(
                     tap(writeLog),
                     ifElse(
                         validate,
@@ -126,25 +127,8 @@ const tryer =  await pipe(
                     )
         )
 
-tryCatch(tryer, handleError)(value)
+tryCatch(mainProcessor, handleError)(value)
 
-    // writeLog(value);
-    //
-    // api.get('https://api.tech/numbers/base', {from: 2, to: 10, number: '01011010101'}).then(({result}) => {
-    //     writeLog(result);
-    // });
-    //
-    // wait(2500).then(() => {
-    //     writeLog('SecondLog')
-    //
-    //     return wait(1500);
-    // }).then(() => {
-    //     writeLog('ThirdLog');
-    //
-    //     return wait(400);
-    // }).then(() => {
-    //     handleSuccess('Done');
-    // });
 }
 
 export default processSequence;
