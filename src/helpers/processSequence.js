@@ -18,7 +18,7 @@
 import {
     __, allPass, both, compose, set, gt, lt, pipe,
     tap, length, test, ifElse, pipeWith, andThen, lensProp,
-    append, apply, prop, converge, multiply, identity, modulo, concat, tryCatch
+    append, apply, prop, converge, multiply, identity, modulo, concat, tryCatch, startsWith, head, anyPass
 } from "ramda"
 
 import Api from '../tools/api';
@@ -82,7 +82,13 @@ const isPositive =  compose(
     Number
 )
 
-const isOnlyDigitsAndPoint = test(/^\d+\.?[\d]*$/)
+const isOnlyDigitsAndPoint = anyPass([
+    startsWith('0.'),
+    compose(
+        test(/[1-9]/),
+        head,
+    ),
+])
 
 const validate = allPass([
         isNotInfinity,
