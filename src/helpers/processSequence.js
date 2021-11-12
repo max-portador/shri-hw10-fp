@@ -1,24 +1,24 @@
 /**
  * @file Домашка по FP ч. 2
- * 
+ *
  * Подсказки:
  * Метод get у инстанса Api – каррированый
  * GET / https://animals.tech/{id}
- * 
+ *
  * GET / https://api.tech/numbers/base
  * params:
  * – number [Int] – число
  * – from [Int] – из какой системы счисления
  * – to [Int] – в какую систему счисления
- * 
+ *
  * Иногда промисы от API будут приходить в состояние rejected, (прямо как и API в реальной жизни)
  * Ответ будет приходить в поле {result}
  */
 
 import {
-    __,    allPass,    both,    compose,    set,    gt,    lt,    pipe,
-    tap,    length,    test,    ifElse,    pipeWith,    andThen,    lensProp,
-    append, apply, prop, converge, multiply, identity, modulo, concat
+    __, allPass, both, compose, set, gt, lt, pipe,
+    tap, length, test, ifElse, pipeWith, andThen, lensProp,
+    append, apply, prop, converge, multiply, identity, modulo, concat, tryCatch
 } from "ramda"
 
 import Api from '../tools/api';
@@ -30,7 +30,7 @@ const getResult = prop("result")
 const resolve = (value) => Promise.resolve(value)
 
 const getAnimal = pipeWith(andThen, [
-    Promise.resolve,
+    resolve,
     String,
     concat(animalURL),
     api.get(__, null),
@@ -42,7 +42,7 @@ const square = converge(
     [identity, identity]
 )
 
-const queryParams =  {form: 10,
+const queryParams =  {from: 10,
                         to: 2,
                     number: null}
 
@@ -73,7 +73,8 @@ const validateLength =  compose(
         gt(__, 2),
         lt(__, 10)
     ),
-    length
+    length,
+    String
 )
 
 const isPositive =  compose(
@@ -84,11 +85,11 @@ const isPositive =  compose(
 const isOnlyDigitsAndPoint = test(/^[\d\\.]+/)
 
 const validate = allPass([
-    isNotInfinity,
-    validateLength,
-    isPositive,
-    isOnlyDigitsAndPoint
-])
+        isNotInfinity,
+        validateLength,
+        isPositive,
+        isOnlyDigitsAndPoint
+    ])
 
 const VALIDATION_FAILURE_MESSAGE = "ValidationError"
 
@@ -96,53 +97,39 @@ const VALIDATION_FAILURE_MESSAGE = "ValidationError"
 const processSequence = async ({
        value, writeLog, handleSuccess, handleError
 }) => {
-    // const onSuccessValidation = pipeWith( andThen, [
-    //     resolve,
-    //     roundValue,
-    //     tap(writeLog),
-    //     convertToBinary,
-    //     tap(writeLog),
-    //     String,
-    //     length,
-    //     tap(writeLog),
-    //     square,
-    //     tap(writeLog),
-    //     modulo(__, 3),
-    //     tap(writeLog),
-    //     getAnimal,
-    //     tap(writeLog),
-    //     handleSuccess
-    // ])
+const prepareNumber = pipe(
+    String,
+    length,
+    tap(writeLog),
+    square,
+    tap(writeLog),
+    modulo(__, 3),
+    tap(writeLog),
+)
 
-    try {
-        await pipe(
-            tap(writeLog),
-            ifElse(
-                validate,
-                pipeWith( andThen, [
-                    resolve,
-                    roundValue,
-                    tap(writeLog),
-                    convertToBinary,
-                    tap(writeLog),
-                    String,
-                    length,
-                    tap(writeLog),
-                    square,
-                    tap(writeLog),
-                    modulo(__, 3),
-                    tap(writeLog),
-                    getAnimal,
-                    tap(writeLog),
-                    handleSuccess
-                ]),
-                handleError(VALIDATION_FAILURE_MESSAGE),
-            )
-        ) (value)
-    } catch (e) {
-        handleError(e)
-    }
+ const onTrue =   pipeWith( andThen, [
+     resolve,
+     roundValue,
+     tap(writeLog),
+     convertToBinary,
+     tap(writeLog),
+     prepareNumber,
+     getAnimal,
+     handleSuccess
+ ])
 
+const onFalse = () => { handleError(VALIDATION_FAILURE_MESSAGE) }
+
+const tryer =  await pipe(
+                    tap(writeLog),
+                    ifElse(
+                        validate,
+                        onTrue,
+                        onFalse
+                    )
+        )
+
+tryCatch(tryer, handleError)(value)
 
     // writeLog(value);
     //
