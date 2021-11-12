@@ -18,7 +18,7 @@
 import {
     __, allPass, both, compose, set, gt, lt, pipe,
     tap, length, test, ifElse, pipeWith, andThen, lensProp,
-    append, apply, prop, converge, multiply, identity, modulo, concat, tryCatch, startsWith, head, anyPass
+    append, apply, prop, converge, multiply, identity, modulo, concat, tryCatch
 } from "ramda"
 
 import Api from '../tools/api';
@@ -29,11 +29,14 @@ const animalURL = 'https://animals.tech/'
 const getResult = prop("result")
 const resolve = (value) => Promise.resolve(value)
 
+const formAnimalUrl = concat(animalURL)
+const askServerForAnimal = api.get(__, null)
+
 const getAnimal = pipeWith(andThen, [
     resolve,
     String,
-    concat(animalURL),
-    api.get(__, null),
+    formAnimalUrl,
+    askServerForAnimal,
     getResult
 ])
 
@@ -46,25 +49,20 @@ const queryParams =  {from: 10,
                         to: 2,
                     number: null}
 
+const prepareQueryParams = set(lensProp("number"), __, queryParams)
+const formValidBaseUrl = append(__, [baseURL])
+const askServerForBase = apply(api.get)
+
 const convertToBinary = pipeWith(andThen, [
     resolve,
-    set(
-        lensProp("number"),
-        __,
-       queryParams
-    ),
-    append(__, [baseURL]),
-    apply(api.get),
+    prepareQueryParams,
+    formValidBaseUrl,
+    askServerForBase,
     getResult
 ])
 
 const roundValue = compose(
     Math.round,
-    Number
-)
-
-const isNotInfinity = compose(
-    Number.isFinite,
     Number
 )
 
@@ -82,19 +80,12 @@ const isPositive =  compose(
     Number
 )
 
-const isOnlyDigitsAndPoint = anyPass([
-    startsWith('0.'),
-    compose(
-        test(/[1-9]/),
-        head,
-    ),
-])
+const isFloat = test(/^\d*\.[\d]+$/)
 
 const validate = allPass([
-        isNotInfinity,
         validateLength,
         isPositive,
-        isOnlyDigitsAndPoint
+        isFloat
     ])
 
 const VALIDATION_FAILURE_MESSAGE = "ValidationError"
@@ -113,7 +104,7 @@ const prepareNumber = pipe(
     tap(writeLog),
 )
 
- const onTrue =   pipeWith( andThen, [
+ const onTrue = pipeWith( andThen, [
      resolve,
      roundValue,
      tap(writeLog),
