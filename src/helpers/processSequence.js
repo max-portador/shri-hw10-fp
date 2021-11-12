@@ -80,12 +80,12 @@ const isPositive =  compose(
     Number
 )
 
-const isFloat = test(/^\d*\.[\d]+$/)
+const isNumber = test(/^\d*(\.[\d]+)?$/)
 
 const validate = allPass([
         validateLength,
         isPositive,
-        isFloat
+        isNumber
     ])
 
 const VALIDATION_FAILURE_MESSAGE = "ValidationError"
