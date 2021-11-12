@@ -82,7 +82,7 @@ const isPositive =  compose(
     Number
 )
 
-const isOnlyDigitsAndPoint = test(/^[\d\\.]+/)
+const isOnlyDigitsAndPoint = test(/^\d+\.?[\d]*$/)
 
 const validate = allPass([
         isNotInfinity,

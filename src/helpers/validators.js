@@ -19,14 +19,13 @@ import {
     props
 } from "ramda";
 
-const hasColor = color => equals(__, color)
-const isWhite = hasColor("white")
-const isGreen = hasColor("green")
-const isRed = hasColor("red")
-const isBlue = hasColor("blue")
-const isOrange = hasColor("orange")
+const isWhite = equals("white")
+const isGreen = equals("green")
+const isRed = equals("red")
+const isBlue = equals("blue")
+const isOrange = equals("orange")
 
-const shapesColored = (color) => filter(hasColor(color), __)
+const shapesColored = (color) => filter(equals(color, __))
 
 const getNumberColoredShapes = (color) => compose(
     length,
@@ -45,6 +44,10 @@ const numberColoredShapesEq = (color, number) => compose(
 )
 
 const curriedNumberColoredShapesGTE = curry(numberColoredShapesGTE)
+const hasTwoGreenShapes = numberColoredShapesEq("green", 2)
+const hasOneRedShape = numberColoredShapesEq("red",1)
+const numberColoredShapesGTE3 = curriedNumberColoredShapesGTE(__, 3)
+const hasGreenTriangle = propSatisfies(isGreen, "triangle")
 
 // 1. Красная звезда, зеленый квадрат, все остальные белые.
 export const validateFieldN1 = allPass([
@@ -75,30 +78,19 @@ export const validateFieldN4 = allPass([
 ])
 
 // 5. Три фигуры одного любого цвета кроме белого (четыре фигуры одного цвета – это тоже true).
-export const validateFieldN5 = (shapes) => {
-    const numberColoredShapesGTE3 = curriedNumberColoredShapesGTE(__, 3)
-    const has3ShapesOfSameColor = anyPass([
+export const validateFieldN5 =  anyPass([
         numberColoredShapesGTE3("red"),
         numberColoredShapesGTE3("green"),
         numberColoredShapesGTE3("blue"),
         numberColoredShapesGTE3("orange"),
     ])
 
-    return has3ShapesOfSameColor(shapes)
-}
-
 // 6. Две зеленые фигуры (одна из них треугольник), еще одна любая красная.
-export const validateFieldN6 = (shapes) => {
-    const hasGreenTriangle = propSatisfies(isGreen, "triangle")
-    const hasTwoGreenShapes = numberColoredShapesEq("green", 2)
-    const hasOneRedShape = numberColoredShapesEq("red",1)
-    const isSixthFiledValid = allPass([
+export const validateFieldN6 = allPass([
         hasGreenTriangle,
         hasTwoGreenShapes,
         hasOneRedShape,
     ])
-    return isSixthFiledValid(shapes)
-}
 
 // 7. Все фигуры оранжевые.
 export const validateFieldN7 = compose(
