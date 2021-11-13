@@ -18,7 +18,7 @@
 import {
     __, allPass, both, compose, set, gt, lt, pipe,
     tap, length, test, ifElse, andThen, lensProp,
-    append, apply, prop, converge, multiply, identity, modulo, concat, tryCatch, thunkify, otherwise
+    append, apply, prop, converge, multiply, identity, modulo, concat, thunkify, otherwise
 } from "ramda"
 
 import Api from '../tools/api';
@@ -115,7 +115,6 @@ const step1 = pipe(
 const step2 = pipe(
     log,
     prepareNumber,
-    log,
     getAnimal,
     andThen(handleSuccess),
     otherwise(handleError)
@@ -136,7 +135,7 @@ const mainProcessor = await pipe(
                     )
         )
 
-tryCatch(mainProcessor, onError)(value)
+mainProcessor(value)
 
 }
 
