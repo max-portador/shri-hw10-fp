@@ -95,7 +95,6 @@ const convertToBinary = pipe(
     prepareQueryParams,
     formValidBaseUrl,
     askServerForBase,
-    andThen(getResult),
     resultFromServer
 )
 
