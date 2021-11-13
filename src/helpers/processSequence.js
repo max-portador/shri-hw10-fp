@@ -70,7 +70,7 @@ const validate = allPass([
 const VALIDATION_FAILURE_MESSAGE = "ValidationError"
 
 
-const processSequence = async ({
+const processSequence = ({
        value, writeLog, handleSuccess, handleError
 }) => {
 
@@ -126,7 +126,7 @@ const step2 = pipe(
      otherwise(handleError)
  )
 
-const mainProcessor = await pipe(
+const mainProcessor = pipe(
                     log,
                     ifElse(
                         validate,
