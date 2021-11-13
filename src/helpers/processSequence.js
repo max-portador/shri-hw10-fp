@@ -49,10 +49,7 @@ const roundValue = compose(
 )
 
 const validateLength =  compose(
-    both(
-        gt(__, 2),
-        lt(__, 10)
-    ),
+    both( gt(__, 2), lt(__, 10)),
     length,
     String
 )
