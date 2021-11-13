@@ -55,6 +55,7 @@ const askServerForBase = apply(api.get)
 
 const convertToBinary = pipeWith(andThen, [
     resolve,
+    String,
     prepareQueryParams,
     formValidBaseUrl,
     askServerForBase,
@@ -77,10 +78,10 @@ const validateLength =  compose(
 
 const isPositive =  compose(
     gt(__, 0),
-    roundValue
+    Number
 )
 
-const isNumber = test(new RegExp('[+-]?([0-9]*[.])?[0-9]+'))
+const isNumber = test(new RegExp('^\\d+(.\\d+)?$'))
 
 const validate = allPass([
         validateLength,
